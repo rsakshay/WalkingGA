@@ -16,7 +16,8 @@ public class Simulation : MonoBehaviour {
     public Text MText;
     public Text oText;
     public Text pText;
-    
+
+    private Genome bestGenome;
     private float bestScore = 0;
     private List<Creature> creatures = new List<Creature>();
     
@@ -32,6 +33,7 @@ public class Simulation : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        bestGenome = new Genome();
         StartCoroutine(Sim());
 	}
 	
@@ -63,11 +65,11 @@ public class Simulation : MonoBehaviour {
     void UpdateText(int generation)
     {
         genText.text = "Generation: " + (generation + 1);
-        //scoreText.text = "Best Score: " + bestScore;
-        //mText.text = "left m: " + bestGenome.left.m + "  right m: " + bestGenome.right.m;
-        //MText.text = "left M: " + bestGenome.left.M + "  right M: " + bestGenome.right.M;
-        //oText.text = "left o: " + bestGenome.left.o + "  right o: " + bestGenome.right.o;
-        //pText.text = "left p: " + bestGenome.left.p + "  right p: " + bestGenome.right.p;
+        scoreText.text = "Best Score: " + bestScore;
+        mText.text = "left m: " + bestGenome.left.m + "  right m: " + bestGenome.right.m;
+        MText.text = "left M: " + bestGenome.left.M + "  right M: " + bestGenome.right.M;
+        oText.text = "left o: " + bestGenome.left.o + "  right o: " + bestGenome.right.o;
+        pText.text = "left p: " + bestGenome.left.p + "  right p: " + bestGenome.right.p;
     }
 
     void CreateCreatures(int currentGeneration)
@@ -88,10 +90,11 @@ public class Simulation : MonoBehaviour {
                 Parent p2 = SelectParent();
 
                 genome = Genome.Crossover(p1.parentGenome, p2.parentGenome);
+                genome.Mutate();
             }
 
             // Instantiate creature
-            Vector3 pos = Vector3.zero + i * separationDistance;
+            Vector3 pos = (Vector3.down * 35f) + i * separationDistance;
             GameObject creatureGO = Instantiate(creaturePrefab, pos, Quaternion.identity);
 
             Creature creature = creatureGO.GetComponentInChildren<Creature>(true);
@@ -227,25 +230,35 @@ public class Simulation : MonoBehaviour {
     {
         if (betterParents.Count > 0)
         {
+            int bestIndex = 0;
             float score = betterParents[0].parentScore;
             for (int i = 1; i < betterParents.Count; i++)
             {
                 if (betterParents[i].parentScore > score)
+                {
                     score = betterParents[i].parentScore;
+                    bestIndex = i;
+                }
             }
 
+            bestGenome = betterParents[bestIndex].parentGenome;
             return score;
         }
         
         if (worseParents.Count > 0)
         {
+            int bestIndex = 0;
             float score = worseParents[0].parentScore;
             for (int i = 1; i < worseParents.Count; i++)
             {
                 if (worseParents[i].parentScore > score)
+                {
                     score = worseParents[i].parentScore;
+                    bestIndex = i;
+                }
             }
 
+            bestGenome = worseParents[bestIndex].parentGenome;
             return score;
         }
 
