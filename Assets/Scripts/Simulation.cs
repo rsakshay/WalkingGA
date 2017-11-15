@@ -16,17 +16,22 @@ public class Simulation : MonoBehaviour {
     public Text MText;
     public Text oText;
     public Text pText;
-
-    private Genome bestGenome;
+    
     private float bestScore = 0;
     private List<Creature> creatures = new List<Creature>();
+    
+    struct Parent
+    {
+        public Genome parentGenome;
+        public float parentScore;
+    }
+
+    private List<Parent> betterParents = new List<Parent>();
+    private List<Parent> worseParents = new List<Parent>();
 
 
     // Use this for initialization
     void Start () {
-        bestGenome = new Genome();
-        bestGenome.init();
-
         StartCoroutine(Sim());
 	}
 	
@@ -41,7 +46,7 @@ public class Simulation : MonoBehaviour {
         {
             UpdateText(i);
 
-            CreateCreatures();
+            CreateCreatures(i);
             StartSim();
 
             yield return new WaitForSeconds(simulationTime);
@@ -58,20 +63,32 @@ public class Simulation : MonoBehaviour {
     void UpdateText(int generation)
     {
         genText.text = "Generation: " + (generation + 1);
-        scoreText.text = "Best Score: " + bestScore;
-        mText.text = "left m: " + bestGenome.left.m + "  right m: " + bestGenome.right.m;
-        MText.text = "left M: " + bestGenome.left.M + "  right M: " + bestGenome.right.M;
-        oText.text = "left o: " + bestGenome.left.o + "  right o: " + bestGenome.right.o;
-        pText.text = "left p: " + bestGenome.left.p + "  right p: " + bestGenome.right.p;
+        //scoreText.text = "Best Score: " + bestScore;
+        //mText.text = "left m: " + bestGenome.left.m + "  right m: " + bestGenome.right.m;
+        //MText.text = "left M: " + bestGenome.left.M + "  right M: " + bestGenome.right.M;
+        //oText.text = "left o: " + bestGenome.left.o + "  right o: " + bestGenome.right.o;
+        //pText.text = "left p: " + bestGenome.left.p + "  right p: " + bestGenome.right.p;
     }
 
-    void CreateCreatures()
+    void CreateCreatures(int currentGeneration)
     {
         for (int i = 0; i < variations; i++)
         {
-            // Mutate best genome
-            Genome genome = bestGenome.Clone();
-            genome.Mutate();
+            Genome genome = new Genome();
+
+            if (currentGeneration == 0)
+            {
+                // Mutate base genome
+                genome.init();
+                genome.Mutate();
+            }
+            else
+            {
+                Parent p1 = SelectParent();
+                Parent p2 = SelectParent();
+
+                genome = Genome.Crossover(p1.parentGenome, p2.parentGenome);
+            }
 
             // Instantiate creature
             Vector3 pos = Vector3.zero + i * separationDistance;
@@ -82,6 +99,10 @@ public class Simulation : MonoBehaviour {
 
             creatures.Add(creature);
         }
+
+        worseParents.Clear();
+        betterParents.Clear();
+
     }
 
     void StartSim()
@@ -102,15 +123,77 @@ public class Simulation : MonoBehaviour {
 
     void EvaluateScore()
     {
+        //float totalScore = 0;
+        //Genome totalGenome = new Genome();
+        //int numBetter = 0;
+
         foreach (Creature creature in creatures)
         {
             float fitnessVal = creature.GetScore();
 
+            Parent currentCreature = new Parent();
+            currentCreature.parentGenome = creature.genome.Clone();
+            currentCreature.parentScore = fitnessVal;
+
             if (fitnessVal > bestScore)
             {
-                bestScore = fitnessVal;
-                bestGenome = creature.genome.Clone();
+                //bestScore = fitnessVal;
+                //bestGenome = creature.genome.Clone();
+
+                //totalScore += fitnessVal;
+                //totalGenome += creature.genome.Clone();
+                //numBetter++;
+
+                betterParents.Add(currentCreature);
             }
+            else
+                worseParents.Add(currentCreature);
+        }
+
+        bestScore = CalculateMaxBestScore();
+
+        //if (numBetter > 0)
+        //{
+        //    bestScore = totalScore / numBetter;
+        //    bestGenome = totalGenome / numBetter;
+        //}
+    }
+
+    Parent SelectParent()
+    {
+        const int rangeExpander = 10;
+
+        // Get random index for worseParents list
+        int worseIndex = -1;
+        if (worseParents.Count > 0)
+            worseIndex = Random.Range(0, worseParents.Count * rangeExpander) / rangeExpander;
+
+        // Get random index for betterParents list
+        int betterIndex = -1;
+        if (betterParents.Count > 0)
+            betterIndex = Random.Range(0, betterParents.Count * rangeExpander) / rangeExpander;
+
+        // return a random worseParent if no elements in betterParents
+        if (betterIndex == -1)
+            return worseParents[worseIndex];
+
+        // return a random betterParent if no elements in worseParents
+        if (worseIndex == -1)
+            return betterParents[betterIndex];
+
+
+        int choice = Random.Range(0, 10 * rangeExpander) / rangeExpander;
+
+        // If both have valid count then check by choice
+        if (choice < 2)
+        {
+            // Choose parent from worseParents List
+            return worseParents[worseIndex];
+        }
+        else
+        {
+            // Choose parent from betterParents List
+            return betterParents[betterIndex];
         }
     }
 
@@ -120,5 +203,52 @@ public class Simulation : MonoBehaviour {
             Destroy(creature.transform.parent.gameObject);
 
         creatures.Clear();
+    }
+
+    /// <summary>
+    /// Get the minimum score in better parents
+    /// </summary>
+    float CalculateMinBestScore()
+    {
+        float score = betterParents[0].parentScore;
+        for(int i = 1; i < betterParents.Count; i++)
+        {
+            if (betterParents[i].parentScore < score)
+                score = betterParents[i].parentScore;
+        }
+
+        return score;
+    }
+
+    /// <summary>
+    /// Get the maximum score in better parents
+    /// </summary>
+    float CalculateMaxBestScore()
+    {
+        if (betterParents.Count > 0)
+        {
+            float score = betterParents[0].parentScore;
+            for (int i = 1; i < betterParents.Count; i++)
+            {
+                if (betterParents[i].parentScore > score)
+                    score = betterParents[i].parentScore;
+            }
+
+            return score;
+        }
+        
+        if (worseParents.Count > 0)
+        {
+            float score = worseParents[0].parentScore;
+            for (int i = 1; i < worseParents.Count; i++)
+            {
+                if (worseParents[i].parentScore > score)
+                    score = worseParents[i].parentScore;
+            }
+
+            return score;
+        }
+
+        return 0;
     }
 }
