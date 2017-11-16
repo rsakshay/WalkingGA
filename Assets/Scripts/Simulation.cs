@@ -34,6 +34,7 @@ public class Simulation : MonoBehaviour {
     // Use this for initialization
     void Start () {
         bestGenome = new Genome();
+        bestGenome.init();
         StartCoroutine(Sim());
 	}
 	
@@ -77,36 +78,36 @@ public class Simulation : MonoBehaviour {
 
     void CreateCreatures(int currentGeneration)
     {
-        Genome genome = new Genome();
-
-        if (currentGeneration == 0)
-        {
-            // Mutate base genome
-            bestGenome.init();
-            genome.init();
-        }
-
         for (int i = 0; i < variations; i++)
         {
-            if (i == 0)
+            Genome genome = new Genome();
+            genome.init();
+
+            if (currentGeneration == 0)
             {
-                // Copy over the best genome from last population into this population
-                genome = bestGenome;
+                // Randomize the genome for 1st generation
+                genome.Randomize();
             }
-            // Cross over and mutate if this is not the first generation
             else
             {
-                if (currentGeneration != 0)
+                if (i == 0)
+                {
+                    // Copy over the best genome from last population into this population
+                    genome = bestGenome;
+                }
+                // Cross over and mutate if this is not the first generation
+                else
                 {
                     Parent p1 = SelectParent();
                     Parent p2 = SelectParent();
 
                     // Crossover
                     genome = Genome.Crossover(p1.parentGenome, p2.parentGenome);
-                }
 
-                // Mutate
-                genome.Mutate();
+                    // Mutate
+                    if (Random.Range(0, 100) < 5)
+                        genome.Mutate();
+                }
             }
             
             // Instantiate creature

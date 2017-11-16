@@ -19,6 +19,14 @@ public struct GenomeLeg
         p = 0.1f;
     }
 
+    public void Randomize()
+    {
+        m = Random.Range(-1f, +1f);
+        M = Random.Range(-1f, +1f);
+        o = Random.Range(-2f, 2f);
+        p = Random.Range(0.1f, 2f);
+    }
+
     public float EvaluateAt(float time)
     {
         // https://www.alanzucconi.com/2016/04/20/evolutionary-computation-3/
@@ -94,13 +102,37 @@ public struct GenomeLeg
     {
         GenomeLeg cross = new GenomeLeg();
 
-        //cross.m = g1.m;
-        //cross.M = g1.M;
+        int separationPoint = Random.Range(10, 29) / 10;
+        float[] vals = new float[4];
+        float[] g1Vals = new float[4];
+        float[] g2Vals = new float[4];
 
-        //cross.o = g2.o;
-        //cross.p = g2.p;
+        g1Vals[0] = g1.m;
+        g1Vals[1] = g1.M;
+        g1Vals[2] = g1.o;
+        g1Vals[3] = g1.p;
 
-        cross = (g1 + g2) / 2;
+        g2Vals[0] = g2.m;
+        g2Vals[1] = g2.M;
+        g2Vals[2] = g2.o;
+        g2Vals[3] = g2.p;
+
+        for (int i = 0; i <= separationPoint; i++)
+        {
+            vals[i] = g1Vals[i];
+        }
+
+        for (int j = separationPoint + 1; j < 4; j++)
+        {
+            vals[j] = g2Vals[j];
+        }
+
+        cross.m = vals[0];
+        cross.M = vals[1];
+        cross.o = vals[2];
+        cross.p = vals[3];
+
+        //cross = (g1 + g2) / 2;
 
         return cross;
     }
@@ -115,6 +147,12 @@ public struct Genome
     {
         left.init();
         right.init();
+    }
+
+    public void Randomize()
+    {
+        left.Randomize();
+        right.Randomize();
     }
 
     public Genome Clone()
@@ -189,16 +227,6 @@ public class Creature : MonoBehaviour {
     void Start ()
     {
         initialPosition = transform.position;
-
-        //genome.left.m = 0;
-        //genome.left.M = 1;
-        //genome.left.o = -5;
-        //genome.left.p = Mathf.PI;
-
-        //genome.right.m = 0;
-        //genome.right.M = 0;
-        //genome.right.o = 5;
-        //genome.right.p = Mathf.PI;
     }
 	
 	// Update is called once per frame
