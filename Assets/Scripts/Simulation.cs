@@ -49,6 +49,9 @@ public class Simulation : MonoBehaviour {
             UpdateText(i);
 
             CreateCreatures(i);
+
+            yield return new WaitForSeconds(0.5f);
+
             StartSim();
 
             yield return new WaitForSeconds(simulationTime);
@@ -74,25 +77,38 @@ public class Simulation : MonoBehaviour {
 
     void CreateCreatures(int currentGeneration)
     {
+        Genome genome = new Genome();
+
+        if (currentGeneration == 0)
+        {
+            // Mutate base genome
+            bestGenome.init();
+            genome.init();
+        }
+
         for (int i = 0; i < variations; i++)
         {
-            Genome genome = new Genome();
-
-            if (currentGeneration == 0)
+            if (i == 0)
             {
-                // Mutate base genome
-                genome.init();
-                genome.Mutate();
+                // Copy over the best genome from last population into this population
+                genome = bestGenome;
             }
+            // Cross over and mutate if this is not the first generation
             else
             {
-                Parent p1 = SelectParent();
-                Parent p2 = SelectParent();
+                if (currentGeneration != 0)
+                {
+                    Parent p1 = SelectParent();
+                    Parent p2 = SelectParent();
 
-                genome = Genome.Crossover(p1.parentGenome, p2.parentGenome);
+                    // Crossover
+                    genome = Genome.Crossover(p1.parentGenome, p2.parentGenome);
+                }
+
+                // Mutate
                 genome.Mutate();
             }
-
+            
             // Instantiate creature
             Vector3 pos = (Vector3.down * 35f) + i * separationDistance;
             GameObject creatureGO = Instantiate(creaturePrefab, pos, Quaternion.identity);
