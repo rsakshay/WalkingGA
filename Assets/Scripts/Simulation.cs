@@ -27,8 +27,9 @@ public class Simulation : MonoBehaviour {
         public float parentScore;
     }
 
-    private List<Parent> betterParents = new List<Parent>();
-    private List<Parent> worseParents = new List<Parent>();
+    //private List<Parent> betterParents = new List<Parent>();
+    //private List<Parent> worseParents = new List<Parent>();
+    private List<Parent> parents = new List<Parent>();
 
 
     // Use this for initialization
@@ -94,8 +95,8 @@ public class Simulation : MonoBehaviour {
             }
             else
             {
-                Parent p1 = SelectParent();
-                Parent p2 = SelectParent();
+                Parent p1 = SelectParent(true);
+                Parent p2 = SelectParent(false);
 
                 // Crossover
                 Genome.Crossover(p1.parentGenome, p2.parentGenome, out genome1, out genome2);
@@ -113,8 +114,9 @@ public class Simulation : MonoBehaviour {
             InstantiateCreature(i + 1, genome2);
         }
 
-        worseParents.Clear();
-        betterParents.Clear();
+        //worseParents.Clear();
+        //betterParents.Clear();
+        parents.Clear();
 
     }
 
@@ -159,19 +161,20 @@ public class Simulation : MonoBehaviour {
             currentCreature.parentGenome = creature.genome.Clone();
             currentCreature.parentScore = fitnessVal;
 
-            if (fitnessVal > bestScore)
-            {
-                //bestScore = fitnessVal;
-                //bestGenome = creature.genome.Clone();
+            //if (fitnessVal > bestScore)
+            //{
+            //    //bestScore = fitnessVal;
+            //    //bestGenome = creature.genome.Clone();
 
-                //totalScore += fitnessVal;
-                //totalGenome += creature.genome.Clone();
-                //numBetter++;
+            //    //totalScore += fitnessVal;
+            //    //totalGenome += creature.genome.Clone();
+            //    //numBetter++;
 
-                betterParents.Add(currentCreature);
-            }
-            else
-                worseParents.Add(currentCreature);
+            //    betterParents.Add(currentCreature);
+            //}
+            //else
+            //    worseParents.Add(currentCreature);
+            parents.Add(currentCreature);
         }
 
         bestScore = CalculateMaxBestScore();
@@ -183,56 +186,96 @@ public class Simulation : MonoBehaviour {
         //}
     }
 
-    Parent SelectParent()
+    //Parent SelectParent()
+    //{
+    //    const int rangeExpander = 10;
+
+    //    // Get random index for worseParents list
+    //    int worseIndex = -1;
+    //    if (worseParents.Count > 0)
+    //        worseIndex = Random.Range(0, worseParents.Count * rangeExpander) / rangeExpander;
+
+    //    // Get random index for betterParents list
+    //    int betterIndex = -1;
+    //    if (betterParents.Count > 0)
+    //        betterIndex = Random.Range(0, betterParents.Count * rangeExpander) / rangeExpander;
+
+    //    // return a random worseParent if no elements in betterParents
+    //    if (betterIndex == -1)
+    //    {
+    //        Parent returnParent = worseParents[worseIndex];
+    //        worseParents.RemoveAt(worseIndex);
+    //        return returnParent;
+    //    }
+
+    //    // return a random betterParent if no elements in worseParents
+    //    if (worseIndex == -1)
+    //    {
+    //        Parent returnParent = betterParents[betterIndex];
+    //        betterParents.RemoveAt(betterIndex);
+    //        return returnParent;
+    //    }
+
+
+    //    int choice = Random.Range(0, 10 * rangeExpander) / rangeExpander;
+
+    //    // If both have valid count then check by choice
+    //    if (choice < 1)
+    //    {
+    //        // Choose parent from worseParents List
+    //        Parent returnParent = worseParents[worseIndex];
+    //        worseParents.RemoveAt(worseIndex);
+    //        return returnParent;
+    //    }
+    //    else
+    //    {
+    //        // Choose parent from betterParents List
+    //        Parent returnParent = betterParents[betterIndex];
+    //        betterParents.RemoveAt(betterIndex);
+    //        return returnParent;
+    //    }
+    //}
+
+    /// <summary>
+    /// Selects a parent with maximum score from either the first half of the list or the second.
+    /// </summary>
+    /// <param name="firstHalf">boolean to check first half of the list or second half. True will check only the first half</param>
+    /// <returns>Returns a parent with the highest score in the first/seconmd half of the list</returns>
+    Parent SelectParent(bool firstHalf)
     {
-        const int rangeExpander = 10;
+        int startIndex = 0;
+        int endIndex = 0;
 
-        // Get random index for worseParents list
-        int worseIndex = -1;
-        if (worseParents.Count > 0)
-            worseIndex = Random.Range(0, worseParents.Count * rangeExpander) / rangeExpander;
-
-        // Get random index for betterParents list
-        int betterIndex = -1;
-        if (betterParents.Count > 0)
-            betterIndex = Random.Range(0, betterParents.Count * rangeExpander) / rangeExpander;
-
-        // return a random worseParent if no elements in betterParents
-        if (betterIndex == -1)
+        if (firstHalf)
         {
-            Parent returnParent = worseParents[worseIndex];
-            worseParents.RemoveAt(worseIndex);
-            return returnParent;
-        }
-
-        // return a random betterParent if no elements in worseParents
-        if (worseIndex == -1)
-        {
-            Parent returnParent = betterParents[betterIndex];
-            betterParents.RemoveAt(betterIndex);
-            return returnParent;
-        }
-
-
-        int choice = Random.Range(0, 10 * rangeExpander) / rangeExpander;
-
-        // If both have valid count then check by choice
-        if (choice < 1)
-        {
-            // Choose parent from worseParents List
-            Parent returnParent = worseParents[worseIndex];
-            worseParents.RemoveAt(worseIndex);
-            return returnParent;
+            endIndex = parents.Count / 2;
         }
         else
         {
-            // Choose parent from betterParents List
-            Parent returnParent = betterParents[betterIndex];
-            betterParents.RemoveAt(betterIndex);
-            return returnParent;
+            startIndex = parents.Count / 2;
+            endIndex = parents.Count;
         }
+
+        int bestIndex = startIndex;
+        float score = parents[bestIndex].parentScore;
+
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            if (parents[i].parentScore > score)
+            {
+                score = parents[i].parentScore;
+                bestIndex = i;
+            }
+        }
+
+        Parent returnParent = parents[bestIndex];
+        parents.RemoveAt(bestIndex);
+        return returnParent;
     }
 
+    /// <summary>
+    /// Destroys all creatures
+    /// </summary>
     void DestroyCreatures()
     {
         foreach (Creature creature in creatures)
@@ -242,59 +285,64 @@ public class Simulation : MonoBehaviour {
     }
 
     /// <summary>
-    /// Get the minimum score in better parents
+    /// Get the maximum score in better parents
     /// </summary>
-    float CalculateMinBestScore()
-    {
-        float score = betterParents[0].parentScore;
-        for(int i = 1; i < betterParents.Count; i++)
-        {
-            if (betterParents[i].parentScore < score)
-                score = betterParents[i].parentScore;
-        }
+    //float CalculateMaxBestScore()
+    //{
+    //    if (betterParents.Count > 0)
+    //    {
+    //        int bestIndex = 0;
+    //        float score = betterParents[0].parentScore;
+    //        for (int i = 1; i < betterParents.Count; i++)
+    //        {
+    //            if (betterParents[i].parentScore > score)
+    //            {
+    //                score = betterParents[i].parentScore;
+    //                bestIndex = i;
+    //            }
+    //        }
 
-        return score;
-    }
+    //        bestGenome = betterParents[bestIndex].parentGenome;
+    //        return score;
+    //    }
+
+    //    if (worseParents.Count > 0)
+    //    {
+    //        int bestIndex = 0;
+    //        float score = worseParents[0].parentScore;
+    //        for (int i = 1; i < worseParents.Count; i++)
+    //        {
+    //            if (worseParents[i].parentScore > score)
+    //            {
+    //                score = worseParents[i].parentScore;
+    //                bestIndex = i;
+    //            }
+    //        }
+
+    //        bestGenome = worseParents[bestIndex].parentGenome;
+    //        return score;
+    //    }
+
+    //    return 0;
+    //}
 
     /// <summary>
-    /// Get the maximum score in better parents
+    /// Get the maximum score in parents
     /// </summary>
     float CalculateMaxBestScore()
     {
-        if (betterParents.Count > 0)
+        int bestIndex = 0;
+        float score = parents[0].parentScore;
+        for (int i = 1; i < parents.Count; i++)
         {
-            int bestIndex = 0;
-            float score = betterParents[0].parentScore;
-            for (int i = 1; i < betterParents.Count; i++)
+            if (parents[i].parentScore > score)
             {
-                if (betterParents[i].parentScore > score)
-                {
-                    score = betterParents[i].parentScore;
-                    bestIndex = i;
-                }
+                score = parents[i].parentScore;
+                bestIndex = i;
             }
-
-            bestGenome = betterParents[bestIndex].parentGenome;
-            return score;
-        }
-        
-        if (worseParents.Count > 0)
-        {
-            int bestIndex = 0;
-            float score = worseParents[0].parentScore;
-            for (int i = 1; i < worseParents.Count; i++)
-            {
-                if (worseParents[i].parentScore > score)
-                {
-                    score = worseParents[i].parentScore;
-                    bestIndex = i;
-                }
-            }
-
-            bestGenome = worseParents[bestIndex].parentGenome;
-            return score;
         }
 
-        return 0;
+        bestGenome = parents[bestIndex].parentGenome;
+        return score;
     }
 }

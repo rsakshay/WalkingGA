@@ -19,6 +19,14 @@ public struct GenomeLeg
         p = 0.1f;
     }
 
+    public void init(float mVal, float MVal, float oVal, float pVal)
+    {
+        m = mVal;
+        M = MVal;
+        o = oVal;
+        p = pVal;
+    }
+
     public void Randomize()
     {
         m = Random.Range(-1f, +1f);
@@ -73,6 +81,7 @@ public struct GenomeLeg
         }
     }
 
+    // Overloading + operator
     public static GenomeLeg operator +(GenomeLeg g1, GenomeLeg g2)
     {
         GenomeLeg addition = new GenomeLeg();
@@ -85,6 +94,7 @@ public struct GenomeLeg
         return addition;
     }
 
+    // Overloading - operator
     public static GenomeLeg operator /(GenomeLeg g, float val)
     {
         GenomeLeg division = new GenomeLeg();
@@ -98,6 +108,7 @@ public struct GenomeLeg
         return division;
     }
 
+    // Produces 2 crossover legs
     public static void Crossover(GenomeLeg g1, GenomeLeg g2, out GenomeLeg c1, out GenomeLeg c2)
     {
         //GenomeLeg cross = new GenomeLeg();
@@ -155,6 +166,12 @@ public struct Genome
         right.init();
     }
 
+    public void init(float lm, float lM, float lo, float lp, float rm, float rM, float ro, float rp)
+    {
+        left.init(lm, lM, lo, lp);
+        right.init(rm, rM, ro, rp);
+    }
+
     public void Randomize()
     {
         left.Randomize();
@@ -186,6 +203,7 @@ public struct Genome
         }
     }
 
+    // Overriding + operator
     public static Genome operator +(Genome g1, Genome g2)
     {
         Genome addition = new Genome();
@@ -196,6 +214,7 @@ public struct Genome
         return addition;
     }
 
+    // Overriding - operator
     public static Genome operator /(Genome g, float val)
     {
         Genome division = new Genome();
@@ -208,6 +227,7 @@ public struct Genome
         return division;
     }
 
+    // Produces 2 crossover genomes
     public static void Crossover(Genome g1, Genome g2, out Genome c1, out Genome c2)
     {
         GenomeLeg.Crossover(g1.left, g2.left, out c1.left, out c2.left);
