@@ -98,12 +98,13 @@ public struct GenomeLeg
         return division;
     }
 
-    public static GenomeLeg Crossover(GenomeLeg g1, GenomeLeg g2)
+    public static void Crossover(GenomeLeg g1, GenomeLeg g2, out GenomeLeg c1, out GenomeLeg c2)
     {
-        GenomeLeg cross = new GenomeLeg();
+        //GenomeLeg cross = new GenomeLeg();
 
         int separationPoint = Random.Range(10, 29) / 10;
-        float[] vals = new float[4];
+        float[] c1Vals = new float[4];
+        float[] c2Vals = new float[4];
         float[] g1Vals = new float[4];
         float[] g2Vals = new float[4];
 
@@ -119,22 +120,27 @@ public struct GenomeLeg
 
         for (int i = 0; i <= separationPoint; i++)
         {
-            vals[i] = g1Vals[i];
+            c1Vals[i] = g1Vals[i];
+            c2Vals[i] = g2Vals[i];
         }
 
         for (int j = separationPoint + 1; j < 4; j++)
         {
-            vals[j] = g2Vals[j];
+            c1Vals[j] = g2Vals[j];
+            c2Vals[j] = g1Vals[j];
         }
 
-        cross.m = vals[0];
-        cross.M = vals[1];
-        cross.o = vals[2];
-        cross.p = vals[3];
+        c1.m = c1Vals[0];
+        c1.M = c1Vals[1];
+        c1.o = c1Vals[2];
+        c1.p = c1Vals[3];
+
+        c2.m = c2Vals[0];
+        c2.M = c2Vals[1];
+        c2.o = c2Vals[2];
+        c2.p = c2Vals[3];
 
         //cross = (g1 + g2) / 2;
-
-        return cross;
     }
 }
 
@@ -202,14 +208,10 @@ public struct Genome
         return division;
     }
 
-    public static Genome Crossover(Genome g1, Genome g2)
+    public static void Crossover(Genome g1, Genome g2, out Genome c1, out Genome c2)
     {
-        Genome cross = new Genome();
-
-        cross.left = GenomeLeg.Crossover(g1.left, g2.left);
-        cross.right = GenomeLeg.Crossover(g1.right, g2.right);
-
-        return cross;
+        GenomeLeg.Crossover(g1.left, g2.left, out c1.left, out c2.left);
+        GenomeLeg.Crossover(g1.right, g2.right, out c1.right, out c2.right);
     }
 }
 

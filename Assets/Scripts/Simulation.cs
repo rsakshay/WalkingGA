@@ -78,51 +78,55 @@ public class Simulation : MonoBehaviour {
 
     void CreateCreatures(int currentGeneration)
     {
-        for (int i = 0; i < variations; i++)
+        for (int i = 0; i < variations; i+=2)
         {
-            Genome genome = new Genome();
-            genome.init();
+            Genome genome1 = new Genome();
+            genome1.init();
+
+            Genome genome2 = new Genome();
+            genome2.init();
 
             if (currentGeneration == 0)
             {
                 // Randomize the genome for 1st generation
-                genome.Randomize();
+                genome1.Randomize();
+                genome2.Randomize();
             }
             else
             {
-                if (i == 0)
-                {
-                    // Copy over the best genome from last population into this population
-                    genome = bestGenome;
-                }
-                // Cross over and mutate if this is not the first generation
-                else
-                {
-                    Parent p1 = SelectParent();
-                    Parent p2 = SelectParent();
+                Parent p1 = SelectParent();
+                Parent p2 = SelectParent();
 
-                    // Crossover
-                    genome = Genome.Crossover(p1.parentGenome, p2.parentGenome);
+                // Crossover
+                Genome.Crossover(p1.parentGenome, p2.parentGenome, out genome1, out genome2);
 
-                    // Mutate
-                    if (Random.Range(0, 100) < 5)
-                        genome.Mutate();
-                }
+                // Mutate
+                if (Random.Range(0, 100) < 5)
+                    genome1.Mutate();
+
+                if (Random.Range(0, 100) < 5)
+                    genome2.Mutate();
             }
-            
+
             // Instantiate creature
-            Vector3 pos = (Vector3.down * 35f) + i * separationDistance;
-            GameObject creatureGO = Instantiate(creaturePrefab, pos, Quaternion.identity);
-
-            Creature creature = creatureGO.GetComponentInChildren<Creature>(true);
-            creature.genome = genome;
-
-            creatures.Add(creature);
+            InstantiateCreature(i, genome1);
+            InstantiateCreature(i + 1, genome2);
         }
 
         worseParents.Clear();
         betterParents.Clear();
 
+    }
+
+    void InstantiateCreature(int sepDistMultiplier, Genome genome)
+    {
+        Vector3 pos = (Vector3.down * 35f) + sepDistMultiplier * separationDistance;
+        GameObject creatureGO = Instantiate(creaturePrefab, pos, Quaternion.identity);
+
+        Creature creature = creatureGO.GetComponentInChildren<Creature>(true);
+        creature.genome = genome;
+
+        creatures.Add(creature);
     }
 
     void StartSim()
@@ -195,25 +199,37 @@ public class Simulation : MonoBehaviour {
 
         // return a random worseParent if no elements in betterParents
         if (betterIndex == -1)
-            return worseParents[worseIndex];
+        {
+            Parent returnParent = worseParents[worseIndex];
+            worseParents.RemoveAt(worseIndex);
+            return returnParent;
+        }
 
         // return a random betterParent if no elements in worseParents
         if (worseIndex == -1)
-            return betterParents[betterIndex];
+        {
+            Parent returnParent = betterParents[betterIndex];
+            betterParents.RemoveAt(betterIndex);
+            return returnParent;
+        }
 
 
         int choice = Random.Range(0, 10 * rangeExpander) / rangeExpander;
 
         // If both have valid count then check by choice
-        if (choice < 2)
+        if (choice < 1)
         {
             // Choose parent from worseParents List
-            return worseParents[worseIndex];
+            Parent returnParent = worseParents[worseIndex];
+            worseParents.RemoveAt(worseIndex);
+            return returnParent;
         }
         else
         {
             // Choose parent from betterParents List
-            return betterParents[betterIndex];
+            Parent returnParent = betterParents[betterIndex];
+            betterParents.RemoveAt(betterIndex);
+            return returnParent;
         }
     }
 
