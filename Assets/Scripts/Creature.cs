@@ -245,6 +245,8 @@ public class Creature : MonoBehaviour {
 
     private Vector3 initialPosition;
 
+    bool isUp = true;
+
     // Use this for initialization
     void Start ()
     {
@@ -254,10 +256,24 @@ public class Creature : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        left.position = genome.left.EvaluateAt(Time.time);
-        right.position = genome.right.EvaluateAt(Time.time);
+        if (isUp)
+        {
+            left.position = genome.left.EvaluateAt(Time.time);
+            right.position = genome.right.EvaluateAt(Time.time);
+        }
     }
 
+    void CheckIfUp()
+    {
+        float headUpdotUP = Vector2.Dot(transform.up, Vector2.up);
+
+        bool headDown =
+        transform.eulerAngles.z > 180 - 45 &&
+        transform.eulerAngles.z < 180 + 45;
+
+        if (headDown)
+            isUp = false;
+    }
 
     public float GetScore()
     {
@@ -267,11 +283,13 @@ public class Creature : MonoBehaviour {
         float headUpdotUP = Vector2.Dot(transform.up, Vector2.up);
         // Balancing score
         bool headUp =
-        //transform.eulerAngles.z < 0 + 30 ||
-        //transform.eulerAngles.z > 360 - 30;
-        headUpdotUP > 0 && headUpdotUP < Mathf.Cos(30 * Mathf.Deg2Rad);
+        transform.eulerAngles.z < 0 + 30 ||
+        transform.eulerAngles.z > 360 - 30;
+        //headUpdotUP > 0 && headUpdotUP < Mathf.Cos(30 * Mathf.Deg2Rad);
 
-        bool headDown = !headUp;
+        bool headDown = 
+        transform.eulerAngles.z > 180 - 45 &&
+        transform.eulerAngles.z < 180 + 45;
 
         // Return 0 if walking score is 0 meaning creature moving to the left
         if (walkingScore < 0)
@@ -280,7 +298,18 @@ public class Creature : MonoBehaviour {
         return
             walkingScore
             * (headDown ? 0.5f : 1f)
-            + (headUp ? 2f : 0f)
+            + (headUp ? 5f : 0f)
             ;
+    }
+
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.name.ToLower().Contains("land"))
+        {
+            isUp = false;
+            GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+
+        }
     }
 }

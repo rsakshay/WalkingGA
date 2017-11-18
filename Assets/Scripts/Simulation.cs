@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,8 @@ public class Simulation : MonoBehaviour {
     public int generations = 100;
     public int variations = 100;
     public float simulationTime = 15f;
+    [Range(1, 100)]
+    public float mutationChance = 5;
     public GameObject creaturePrefab;
     public Vector3 separationDistance = new Vector3(50, 0, 0);
     public Text genText;
@@ -20,6 +23,7 @@ public class Simulation : MonoBehaviour {
     private Genome bestGenome;
     private float bestScore = 0;
     private List<Creature> creatures = new List<Creature>();
+    private List<float> scores = new List<float>();
     
     struct Parent
     {
@@ -30,6 +34,7 @@ public class Simulation : MonoBehaviour {
     //private List<Parent> betterParents = new List<Parent>();
     //private List<Parent> worseParents = new List<Parent>();
     private List<Parent> parents = new List<Parent>();
+    //private List<Parent> allParents = new List<Parent>();
 
 
     // Use this for initialization
@@ -37,19 +42,13 @@ public class Simulation : MonoBehaviour {
         bestGenome = new Genome();
         bestGenome.init();
         StartCoroutine(Sim());
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+        UpdateText(0);
 	}
 
     public IEnumerator Sim()
     {
         for (int i = 0; i < generations; i++)
         {
-            UpdateText(i);
-
             CreateCreatures(i);
 
             yield return new WaitForSeconds(0.5f);
@@ -64,6 +63,29 @@ public class Simulation : MonoBehaviour {
             DestroyCreatures();
 
             yield return new WaitForSeconds(1);
+
+            UpdateText(i + 1);
+        }
+
+        WriteToFile();
+    }
+
+    void WriteToFile()
+    {
+        using (StreamWriter sw = new StreamWriter("scores.txt"))
+        {
+            foreach (float val in scores)
+            {
+                sw.WriteLine(val);
+            }
+        }
+        
+        using (StreamWriter sw = new StreamWriter("bestGenome.txt"))
+        {
+            sw.WriteLine(mText.text);
+            sw.WriteLine(MText.text);
+            sw.WriteLine(oText.text);
+            sw.WriteLine(pText.text);
         }
     }
 
@@ -100,14 +122,14 @@ public class Simulation : MonoBehaviour {
 
                 // Crossover
                 Genome.Crossover(p1.parentGenome, p2.parentGenome, out genome1, out genome2);
-
-                // Mutate
-                if (Random.Range(0, 100) < 5)
-                    genome1.Mutate();
-
-                if (Random.Range(0, 100) < 5)
-                    genome2.Mutate();
             }
+
+            // Mutate
+            if (Random.Range(0, 100) < mutationChance)
+                genome1.Mutate();
+
+            if (Random.Range(0, 100) < mutationChance)
+                genome2.Mutate();
 
             // Instantiate creature
             InstantiateCreature(i, genome1);
@@ -175,9 +197,14 @@ public class Simulation : MonoBehaviour {
             //else
             //    worseParents.Add(currentCreature);
             parents.Add(currentCreature);
+            //allParents.Add(currentCreature);
+
+            //if (fitnessVal > bestScore)
+            //    betterParents.Add(currentCreature);
         }
 
         bestScore = CalculateMaxBestScore();
+        scores.Add(bestScore);
 
         //if (numBetter > 0)
         //{
@@ -243,6 +270,9 @@ public class Simulation : MonoBehaviour {
     /// <returns>Returns a parent with the highest score in the first/seconmd half of the list</returns>
     Parent SelectParent(bool firstHalf)
     {
+        //if (betterParents.Count == 0)
+        //    return SelectBestParent(allParents);
+
         int startIndex = 0;
         int endIndex = 0;
 
@@ -259,7 +289,7 @@ public class Simulation : MonoBehaviour {
         int bestIndex = startIndex;
         float score = parents[bestIndex].parentScore;
 
-        for (int i = startIndex; i < endIndex; i++)
+        for (int i = startIndex + 1; i < endIndex; i++)
         {
             if (parents[i].parentScore > score)
             {
@@ -270,6 +300,25 @@ public class Simulation : MonoBehaviour {
 
         Parent returnParent = parents[bestIndex];
         parents.RemoveAt(bestIndex);
+        return returnParent;
+    }
+
+    Parent SelectBestParent(List<Parent> parentList)
+    {
+        int bestIndex = 0;
+        float score = parentList[0].parentScore;
+
+        for (int i = 1; i < parentList.Count; i++)
+        {
+            if (parentList[i].parentScore > score)
+            {
+                score = parentList[i].parentScore;
+                bestIndex = i;
+            }
+        }
+
+        Parent returnParent = parentList[bestIndex];
+        parentList.RemoveAt(bestIndex);
         return returnParent;
     }
 
@@ -331,6 +380,9 @@ public class Simulation : MonoBehaviour {
     /// </summary>
     float CalculateMaxBestScore()
     {
+        if (parents.Count == 0)
+            return bestScore;
+
         int bestIndex = 0;
         float score = parents[0].parentScore;
         for (int i = 1; i < parents.Count; i++)

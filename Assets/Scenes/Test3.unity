@@ -213,6 +213,7 @@ MonoBehaviour:
   generations: 100
   variations: 100
   simulationTime: 15
+  mutationChance: 5
   creaturePrefab: {fileID: 1214303202643544, guid: ddcb2bedbb3d3cd4e918577fdc360652,
     type: 2}
   separationDistance: {x: 10, y: 0, z: 0}
@@ -233,15 +234,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6c0b1f7beb551f43be709dbb0f95793, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generation: 100
-  left_m: 0.52
-  left_M: -0.5
-  left_o: 1.69
-  left_p: 1.56
-  right_m: 0.34
-  right_M: -0.37
-  right_o: 0.38
-  right_p: 0.75
+  generation: 21
+  left_m: 0.1350549
+  left_M: -0.3801836
+  left_o: -1.008494
+  left_p: 1.13
+  right_m: 0.2
+  right_M: 0.9875693
+  right_o: -1.322457
+  right_p: 1.553091
   creaturePrefab: {fileID: 1214303202643544, guid: ddcb2bedbb3d3cd4e918577fdc360652,
     type: 2}
   genText: {fileID: 1799931460}

@@ -1,0 +1,4 @@
+left m: -0.2611862  right m: 0.9114189
+left M: 0.183488  right M: -0.7206848
+left o: 0.1065872  right o: 0.164428
+left p: 0.1632225  right p: 1.653057

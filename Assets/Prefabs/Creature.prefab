@@ -81,10 +81,10 @@ GameObject:
   - component: {fileID: 23484160925898802}
   - component: {fileID: 33997281390511564}
   - component: {fileID: 50987081065767430}
-  - component: {fileID: 70020807461609134}
   - component: {fileID: 233806501631143030}
   - component: {fileID: 233283270584587636}
   - component: {fileID: 114528944452881830}
+  - component: {fileID: 61629062131672650}
   m_Layer: 8
   m_Name: Head
   m_TagString: Untagged
@@ -125,7 +125,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1214303202643544}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 235.16287, y: 12.117666, z: 0}
+  m_LocalPosition: {x: 64.8, y: -83.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4987173481565232}
@@ -426,8 +426,8 @@ PolygonCollider2D:
       - {x: 0.50288767, y: -0.5805053}
       - {x: 0.5067089, y: -0.45720845}
       - {x: 0.5013826, y: 0.5668146}
---- !u!70 &70020807461609134
-CapsuleCollider2D:
+--- !u!61 &61629062131672650
+BoxCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -438,9 +438,19 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.000000059604645}
-  m_Size: {x: 1.0000001, y: 2.0000005}
-  m_Direction: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.99999994, y: 1.9999999}
+  m_EdgeRadius: 0
 --- !u!70 &70139922717985582
 CapsuleCollider2D:
   m_ObjectHideFlags: 1
@@ -524,7 +534,7 @@ DistanceJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 0
   m_Anchor: {x: 0, y: -0.9917825}
-  m_ConnectedAnchor: {x: 0.015546255, y: -0.97508335}
+  m_ConnectedAnchor: {x: 0, y: -0.97508335}
   m_AutoConfigureDistance: 0
   m_Distance: 5.1473494
   m_MaxDistanceOnly: 0
@@ -542,7 +552,7 @@ DistanceJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 0
   m_Anchor: {x: 0, y: -0.9917825}
-  m_ConnectedAnchor: {x: -0.010811484, y: -0.976009}
+  m_ConnectedAnchor: {x: 0, y: -0.976009}
   m_AutoConfigureDistance: 0
   m_Distance: 5.1327114
   m_MaxDistanceOnly: 0
